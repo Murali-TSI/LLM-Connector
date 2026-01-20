@@ -12,8 +12,8 @@ class ConnectorFactory:
 
     _registry: Dict[str, Union[Type[LLMConnector], str]] = {
         "openai": "OpenAIConnector",
-        "anthropic": "AnthropicConnector",
-        "groq": "GroqConnector",
+        # "anthropic": "AnthropicConnector",  # Coming soon
+        # "groq": "GroqConnector",  # Coming soon
     }
 
     @classmethod

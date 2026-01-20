@@ -54,10 +54,10 @@ class SystemMessage(BaseModel):
     content: List[TextBlock]
 
     @model_validator(mode="after")
-    def validate_content(cls, v):
-        if not v.content:
+    def validate_content(self):
+        if not self.content:
             raise ValueError("System/Developer message must have text content")
-        return v
+        return self
 
 
 class UserMessage(BaseModel):
@@ -66,10 +66,10 @@ class UserMessage(BaseModel):
     content: List[ContentBlock]
 
     @model_validator(mode="after")
-    def validate_content(cls, v):
-        if not v.content:
+    def validate_content(self):
+        if not self.content:
             raise ValueError("User message must have content")
-        return v
+        return self
 
 
 class AssistantMessage(BaseModel):
@@ -79,12 +79,12 @@ class AssistantMessage(BaseModel):
     tool_calls: Optional[List[ToolCall]] = None
 
     @model_validator(mode="after")
-    def validate_assistant(cls, v):
-        if v.content and v.tool_calls:
+    def validate_assistant(self):
+        if self.content and self.tool_calls:
             raise ValueError("Assistant message cannot have both content and tool_calls")
-        if not v.content and not v.tool_calls:
+        if not self.content and not self.tool_calls:
             raise ValueError("Assistant message must have content or tool_calls")
-        return v
+        return self
 
 
 class ToolMessage(BaseModel):
@@ -94,10 +94,10 @@ class ToolMessage(BaseModel):
     content: List[TextBlock]
 
     @model_validator(mode="after")
-    def validate_tool(cls, v):
-        if not v.content:
+    def validate_tool(self):
+        if not self.content:
             raise ValueError("Tool message must have content")
-        return v
+        return self
 
 
 Message = Union[
