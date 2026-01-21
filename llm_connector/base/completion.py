@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Iterable, Optional, List, Union
+from typing import Any, AsyncIterator, Dict, Iterator, Optional, List, Union
 
 from .message import Message, ToolCall
 
@@ -106,7 +106,7 @@ class ChatCompletion(ABC):
     """Abstract base class for chat completion API."""
 
     @abstractmethod
-    def invoke(self, *, messages: Union[str, Message, List[Message]], tools: Optional[List[Dict[str, Any]]] = None, model: Optional[str] = None, temperature: Optional[float] = None, max_tokens: Optional[int] = None, stream: bool = False, **kwargs: Any) -> Union[ChatResponses, Iterable[ChatStreamChunks]]:
+    def invoke(self, *, messages: Union[str, Message, List[Message]], tools: Optional[List[Dict[str, Any]]] = None, model: Optional[str] = None, temperature: Optional[float] = None, max_tokens: Optional[int] = None, stream: bool = False, **kwargs: Any) -> Union[ChatResponses, Iterator[ChatStreamChunks]]:
         """
         Send a chat completion request.
 
@@ -120,7 +120,29 @@ class ChatCompletion(ABC):
             **kwargs: Additional provider-specific parameters
 
         Returns:
-            ChatResponses if stream=False, Iterable[ChatStreamChunks] if stream=True
+            ChatResponses if stream=False, Iterator[ChatStreamChunks] if stream=True
         """
         pass
-        
+
+
+class AsyncChatCompletion(ABC):
+    """Abstract base class for async chat completion API."""
+
+    @abstractmethod
+    async def invoke(self, *, messages: Union[str, Message, List[Message]], tools: Optional[List[Dict[str, Any]]] = None, model: Optional[str] = None, temperature: Optional[float] = None, max_tokens: Optional[int] = None, stream: bool = False, **kwargs: Any) -> Union[ChatResponses, AsyncIterator[ChatStreamChunks]]:
+        """
+        Send an async chat completion request.
+
+        Args:
+            messages: Input messages - can be a string, single Message, or list of Messages
+            tools: List of tool definitions for function calling
+            model: Model to use (provider-specific default if not specified)
+            temperature: Sampling temperature (0-2)
+            max_tokens: Maximum tokens to generate
+            stream: Whether to stream the response
+            **kwargs: Additional provider-specific parameters
+
+        Returns:
+            ChatResponses if stream=False, AsyncIterator[ChatStreamChunks] if stream=True
+        """
+        pass

@@ -6,3 +6,4 @@ dist/
 __pycache__/
 *.pyo
 *.pyd
+**/.DS_Store

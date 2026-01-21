@@ -47,6 +47,7 @@ class BatchResult(BaseModel):
 
 
 class BatchProcess(ABC):
+    """Abstract base class for batch processing API."""
 
     @abstractmethod
     def create(self, *, file: Union[str, bytes, BinaryIO], completion_window: Literal["24h"] = "24h", **kwargs: Any) -> BatchRequest:
@@ -71,4 +72,33 @@ class BatchProcess(ABC):
     @abstractmethod
     def list(self, *, limit: int = 20, after: Optional[str] = None, **kwargs: Any) -> List[BatchRequest]:
         """List batch jobs."""
+        pass
+
+
+class AsyncBatchProcess(ABC):
+    """Abstract base class for async batch processing API."""
+
+    @abstractmethod
+    async def create(self, *, file: Union[str, bytes, BinaryIO], completion_window: Literal["24h"] = "24h", **kwargs: Any) -> BatchRequest:
+        """Create a new batch job asynchronously."""
+        pass
+
+    @abstractmethod
+    async def status(self, job_id: str, **kwargs: Any) -> BatchRequest:
+        """Get the status of a batch job asynchronously."""
+        pass
+
+    @abstractmethod
+    async def result(self, job_id: str, **kwargs: Any) -> BatchResult:
+        """Get the results of a completed batch job asynchronously."""
+        pass
+
+    @abstractmethod
+    async def cancel(self, job_id: str, **kwargs: Any) -> BatchRequest:
+        """Cancel a batch job asynchronously."""
+        pass
+
+    @abstractmethod
+    async def list(self, *, limit: int = 20, after: Optional[str] = None, **kwargs: Any) -> List[BatchRequest]:
+        """List batch jobs asynchronously."""
         pass

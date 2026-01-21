@@ -4,18 +4,27 @@ LLM Connector Library
 A unified interface for interacting with multiple LLM providers.
 
 Usage:
-    from llm import ConnectorFactory
+    from llm_connector import ConnectorFactory
 
     # Create a connector
     connector = ConnectorFactory.create("openai", config={"api_key": "..."})
 
-    # Chat completion
+    # Sync chat completion
     response = connector.chat().invoke(messages="Hello, how are you?")
     print(response.content)
 
-    # Streaming
+    # Sync streaming
     for chunk in connector.chat().invoke(messages="Tell me a story", stream=True):
         print(chunk.delta_content, end="", flush=True)
+
+    # Async chat completion
+    async def main():
+        response = await connector.async_chat().invoke(messages="Hello!")
+        print(response.content)
+
+        # Async streaming
+        async for chunk in await connector.async_chat().invoke(messages="Tell me a story", stream=True):
+            print(chunk.delta_content, end="", flush=True)
 """
 
 from .base import (
@@ -34,22 +43,28 @@ from .base import (
     ToolMessage,
     Message,
     Conversation,
-    # Completion
+    # Completion (sync)
     ChatCompletion,
     ChatResponses,
     ChatStreamChunks,
     Usage,
     ToolCallDelta,
-    # Batch
+    # Completion (async)
+    AsyncChatCompletion,
+    # Batch (sync)
     BatchStatus,
     BatchTimestamp,
     BatchRequest,
     BatchResult,
     BatchProcess,
-    # File
+    # Batch (async)
+    AsyncBatchProcess,
+    # File (sync)
     PurposeType,
     FileObject,
     FileAPI,
+    # File (async)
+    AsyncFileAPI,
 )
 
 from .factory import ConnectorFactory
@@ -86,22 +101,28 @@ __all__ = [
     "ToolMessage",
     "Message",
     "Conversation",
-    # Completion
+    # Completion (sync)
     "ChatCompletion",
     "ChatResponses",
     "ChatStreamChunks",
     "Usage",
     "ToolCallDelta",
-    # Batch
+    # Completion (async)
+    "AsyncChatCompletion",
+    # Batch (sync)
     "BatchStatus",
     "BatchTimestamp",
     "BatchRequest",
     "BatchResult",
     "BatchProcess",
-    # File
+    # Batch (async)
+    "AsyncBatchProcess",
+    # File (sync)
     "PurposeType",
     "FileObject",
     "FileAPI",
+    # File (async)
+    "AsyncFileAPI",
     # Exceptions
     "ProviderNotSupportedError",
     "ProviderImportError",

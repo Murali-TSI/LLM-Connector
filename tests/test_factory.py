@@ -33,6 +33,9 @@ class TestConnectorFactory:
         assert hasattr(connector, "chat")
         assert hasattr(connector, "batch")
         assert hasattr(connector, "file")
+        assert hasattr(connector, "async_chat")
+        assert hasattr(connector, "async_batch")
+        assert hasattr(connector, "async_file")
 
     @patch("llm_connector.providers.openai.OPENAI_AVAILABLE", True)
     @patch("llm_connector.providers.openai.OpenAI")
@@ -58,6 +61,15 @@ class TestConnectorFactory:
                 return None
             
             def file(self):
+                return None
+            
+            def async_chat(self):
+                return None
+            
+            def async_batch(self):
+                return None
+            
+            def async_file(self):
                 return None
         
         ConnectorFactory.register("custom", CustomConnector)
@@ -88,6 +100,15 @@ class TestConnectorFactory:
                 return None
             
             def file(self):
+                return None
+            
+            def async_chat(self):
+                return None
+            
+            def async_batch(self):
+                return None
+            
+            def async_file(self):
                 return None
         
         ConnectorFactory.register("temp", TempConnector)

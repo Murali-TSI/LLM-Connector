@@ -115,11 +115,9 @@ class TestOpenAIConnector:
     @patch("llm_connector.providers.openai.OPENAI_AVAILABLE", False)
     def test_init_without_openai_package(self):
         """Test initialization without openai package raises error."""
-        # Need to reload the module to pick up the patched value
         import importlib
         import llm_connector.providers.openai as openai_module
         
-        # Store original value
         original_available = openai_module.OPENAI_AVAILABLE
         openai_module.OPENAI_AVAILABLE = False
         
@@ -199,3 +197,111 @@ class TestOpenAIConnector:
         connector = OpenAIConnector(config={"api_key": "test-key"})
         
         assert connector.client is mock_client
+
+    # ==================== Async Tests ====================
+
+    @patch("llm_connector.providers.openai.OPENAI_AVAILABLE", True)
+    @patch("llm_connector.providers.openai.AsyncOpenAI")
+    @patch("llm_connector.providers.openai.OpenAI")
+    def test_async_chat_returns_async_completion(self, mock_openai, mock_async_openai):
+        """Test async_chat() returns AsyncChatCompletion instance."""
+        from llm_connector.providers.openai import OpenAIConnector
+        from llm_connector.base import AsyncChatCompletion
+        
+        mock_openai.return_value = MagicMock()
+        mock_async_openai.return_value = MagicMock()
+        
+        connector = OpenAIConnector(config={"api_key": "test-key"})
+        async_chat = connector.async_chat()
+        
+        assert isinstance(async_chat, AsyncChatCompletion)
+
+    @patch("llm_connector.providers.openai.OPENAI_AVAILABLE", True)
+    @patch("llm_connector.providers.openai.AsyncOpenAI")
+    @patch("llm_connector.providers.openai.OpenAI")
+    def test_async_chat_is_cached(self, mock_openai, mock_async_openai):
+        """Test async_chat() returns same instance on multiple calls."""
+        from llm_connector.providers.openai import OpenAIConnector
+        
+        mock_openai.return_value = MagicMock()
+        mock_async_openai.return_value = MagicMock()
+        
+        connector = OpenAIConnector(config={"api_key": "test-key"})
+        async_chat1 = connector.async_chat()
+        async_chat2 = connector.async_chat()
+        
+        assert async_chat1 is async_chat2
+
+    @patch("llm_connector.providers.openai.OPENAI_AVAILABLE", True)
+    @patch("llm_connector.providers.openai.AsyncOpenAI")
+    @patch("llm_connector.providers.openai.OpenAI")
+    def test_async_batch_returns_async_batch_process(self, mock_openai, mock_async_openai):
+        """Test async_batch() returns AsyncBatchProcess instance."""
+        from llm_connector.providers.openai import OpenAIConnector
+        from llm_connector.base import AsyncBatchProcess
+        
+        mock_openai.return_value = MagicMock()
+        mock_async_openai.return_value = MagicMock()
+        
+        connector = OpenAIConnector(config={"api_key": "test-key"})
+        async_batch = connector.async_batch()
+        
+        assert isinstance(async_batch, AsyncBatchProcess)
+
+    @patch("llm_connector.providers.openai.OPENAI_AVAILABLE", True)
+    @patch("llm_connector.providers.openai.AsyncOpenAI")
+    @patch("llm_connector.providers.openai.OpenAI")
+    def test_async_file_returns_async_file_api(self, mock_openai, mock_async_openai):
+        """Test async_file() returns AsyncFileAPI instance."""
+        from llm_connector.providers.openai import OpenAIConnector
+        from llm_connector.base import AsyncFileAPI
+        
+        mock_openai.return_value = MagicMock()
+        mock_async_openai.return_value = MagicMock()
+        
+        connector = OpenAIConnector(config={"api_key": "test-key"})
+        async_file = connector.async_file()
+        
+        assert isinstance(async_file, AsyncFileAPI)
+
+    @patch("llm_connector.providers.openai.OPENAI_AVAILABLE", True)
+    @patch("llm_connector.providers.openai.AsyncOpenAI")
+    @patch("llm_connector.providers.openai.OpenAI")
+    def test_async_client_lazy_initialization(self, mock_openai, mock_async_openai):
+        """Test async client is lazily initialized."""
+        from llm_connector.providers.openai import OpenAIConnector
+        
+        mock_openai.return_value = MagicMock()
+        mock_async_client = MagicMock()
+        mock_async_openai.return_value = mock_async_client
+        
+        connector = OpenAIConnector(config={"api_key": "test-key"})
+        
+        # AsyncOpenAI should not be called yet
+        mock_async_openai.assert_not_called()
+        
+        # Access async_client property
+        client = connector.async_client
+        
+        # Now it should be called
+        mock_async_openai.assert_called_once()
+        assert client is mock_async_client
+
+    @patch("llm_connector.providers.openai.OPENAI_AVAILABLE", True)
+    @patch("llm_connector.providers.openai.AsyncOpenAI")
+    @patch("llm_connector.providers.openai.OpenAI")
+    def test_async_client_reuses_same_instance(self, mock_openai, mock_async_openai):
+        """Test async client returns same instance on multiple accesses."""
+        from llm_connector.providers.openai import OpenAIConnector
+        
+        mock_openai.return_value = MagicMock()
+        mock_async_openai.return_value = MagicMock()
+        
+        connector = OpenAIConnector(config={"api_key": "test-key"})
+        
+        client1 = connector.async_client
+        client2 = connector.async_client
+        
+        # Should only be called once
+        assert mock_async_openai.call_count == 1
+        assert client1 is client2

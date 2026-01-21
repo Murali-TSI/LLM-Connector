@@ -1,11 +1,20 @@
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, AsyncMock
 
 
 @pytest.fixture
 def mock_openai_client():
     """Create a mock OpenAI client."""
     with patch("llm_connector.providers.openai.OpenAI") as mock:
+        client = MagicMock()
+        mock.return_value = client
+        yield client
+
+
+@pytest.fixture
+def mock_async_openai_client():
+    """Create a mock AsyncOpenAI client."""
+    with patch("llm_connector.providers.openai.AsyncOpenAI") as mock:
         client = MagicMock()
         mock.return_value = client
         yield client
