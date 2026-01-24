@@ -15,11 +15,9 @@ def main():
     print("=" * 50)
     print("Example 1: Simple string message")
     print("=" * 50)
-    
-    response = connector.chat().invoke(
-        messages="What is the capital of France?"
-    )
-    
+
+    response = connector.chat().invoke(messages="What is the capital of France?")
+
     print(f"Response: {response.content}")
     print(f"Model: {response.model}")
     print(f"Finish reason: {response.finish_reason}")
@@ -30,14 +28,14 @@ def main():
     print("=" * 50)
     print("Example 2: Custom parameters")
     print("=" * 50)
-    
+
     response = connector.chat().invoke(
         messages="Write a haiku about Python programming",
         model="gpt-4o-mini",
         temperature=0.9,
         max_tokens=100,
     )
-    
+
     print(f"Response: {response.content}")
     print()
 
@@ -45,7 +43,7 @@ def main():
     print("=" * 50)
     print("Example 3: Using structured messages")
     print("=" * 50)
-    
+
     from llm_connector import (
         SystemMessage,
         UserMessage,
@@ -56,11 +54,12 @@ def main():
     messages = [
         SystemMessage(
             role=Role.SYSTEM,
-            content=[TextBlock(text="You are a helpful assistant that speaks like a pirate.")]
+            content=[
+                TextBlock(text="You are a helpful assistant that speaks like a pirate.")
+            ],
         ),
         UserMessage(
-            role=Role.USER,
-            content=[TextBlock(text="Hello, how are you today?")]
+            role=Role.USER, content=[TextBlock(text="Hello, how are you today?")]
         ),
     ]
 

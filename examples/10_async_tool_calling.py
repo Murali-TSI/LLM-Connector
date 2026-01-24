@@ -17,12 +17,12 @@ def get_weather(location: str, unit: str = "celsius") -> dict:
         "London": {"temp": 15, "condition": "Cloudy"},
         "New York": {"temp": 18, "condition": "Partly cloudy"},
     }
-    
+
     data = weather_data.get(location, {"temp": 20, "condition": "Unknown"})
-    
+
     if unit == "fahrenheit":
-        data["temp"] = (data["temp"] * 9/5) + 32
-    
+        data["temp"] = (data["temp"] * 9 / 5) + 32
+
     return {
         "location": location,
         "temperature": data["temp"],
@@ -34,7 +34,7 @@ def get_weather(location: str, unit: str = "celsius") -> dict:
 def get_time(timezone: str) -> dict:
     """Simulated time API call."""
     from datetime import datetime, timedelta
-    
+
     offsets = {
         "UTC": 0,
         "EST": -5,
@@ -42,10 +42,10 @@ def get_time(timezone: str) -> dict:
         "JST": 9,
         "GMT": 0,
     }
-    
+
     offset = offsets.get(timezone.upper(), 0)
     current_time = datetime.utcnow() + timedelta(hours=offset)
-    
+
     return {
         "timezone": timezone,
         "time": current_time.strftime("%H:%M:%S"),
@@ -63,16 +63,16 @@ tools = [
             "properties": {
                 "location": {
                     "type": "string",
-                    "description": "The city name, e.g., Tokyo, London, New York"
+                    "description": "The city name, e.g., Tokyo, London, New York",
                 },
                 "unit": {
                     "type": "string",
                     "enum": ["celsius", "fahrenheit"],
-                    "description": "Temperature unit"
-                }
+                    "description": "Temperature unit",
+                },
             },
-            "required": ["location"]
-        }
+            "required": ["location"],
+        },
     },
     {
         "name": "get_time",
@@ -82,12 +82,12 @@ tools = [
             "properties": {
                 "timezone": {
                     "type": "string",
-                    "description": "The timezone, e.g., UTC, EST, PST, JST"
+                    "description": "The timezone, e.g., UTC, EST, PST, JST",
                 }
             },
-            "required": ["timezone"]
-        }
-    }
+            "required": ["timezone"],
+        },
+    },
 ]
 
 available_functions = {
@@ -113,7 +113,7 @@ async def main():
         for tool_call in response.tool_calls:
             print(f"Tool called: {tool_call.name}")
             print(f"Arguments: {tool_call.arguments}")
-            
+
             func = available_functions[tool_call.name]
             result = func(**tool_call.arguments)
             print(f"Result: {result}")
@@ -130,7 +130,11 @@ async def main():
     messages = [
         UserMessage(
             role=Role.USER,
-            content=[TextBlock(text="What's the weather in London and what time is it in JST?")]
+            content=[
+                TextBlock(
+                    text="What's the weather in London and what time is it in JST?"
+                )
+            ],
         )
     ]
 
@@ -138,32 +142,28 @@ async def main():
 
     if response.tool_calls:
         print(f"Model wants to call {len(response.tool_calls)} tool(s)")
-        
+
         messages.append(
             AssistantMessage(
                 role=Role.ASSISTANT,
                 tool_calls=[
-                    ToolCall(
-                        id=tc.id,
-                        name=tc.name,
-                        arguments=tc.arguments
-                    )
+                    ToolCall(id=tc.id, name=tc.name, arguments=tc.arguments)
                     for tc in response.tool_calls
-                ]
+                ],
             )
         )
 
         for tool_call in response.tool_calls:
             print(f"  Executing: {tool_call.name}({tool_call.arguments})")
-            
+
             func = available_functions[tool_call.name]
             result = func(**tool_call.arguments)
-            
+
             messages.append(
                 ToolMessage(
                     role=Role.TOOL,
                     tool_call_id=tool_call.id,
-                    content=[TextBlock(text=json.dumps(result))]
+                    content=[TextBlock(text=json.dumps(result))],
                 )
             )
 
@@ -186,22 +186,18 @@ async def main():
     )
 
     collected_tool_calls = {}
-    
+
     async for chunk in stream:
         if chunk.delta_content:
             print(chunk.delta_content, end="", flush=True)
-        
+
         if chunk.delta_tool_calls:
             for tc_delta in chunk.delta_tool_calls:
                 idx = tc_delta.index
-                
+
                 if idx not in collected_tool_calls:
-                    collected_tool_calls[idx] = {
-                        "id": "",
-                        "name": "",
-                        "arguments": ""
-                    }
-                
+                    collected_tool_calls[idx] = {"id": "", "name": "", "arguments": ""}
+
                 if tc_delta.id:
                     collected_tool_calls[idx]["id"] = tc_delta.id
                 if tc_delta.name:
@@ -213,7 +209,7 @@ async def main():
         print("\nTool calls from stream:")
         for idx, tc in collected_tool_calls.items():
             print(f"  [{idx}] {tc['name']}: {tc['arguments']}")
-            
+
             func = available_functions[tc["name"]]
             args = json.loads(tc["arguments"])
             result = func(**args)

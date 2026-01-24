@@ -28,12 +28,12 @@ async def main():
     # Sequential execution (for comparison)
     print("\nSequential execution:")
     start = time.perf_counter()
-    
+
     sequential_results = []
     for q in questions:
         response = await chat.invoke(messages=q, max_tokens=50)
         sequential_results.append(response.content)
-    
+
     sequential_time = time.perf_counter() - start
     print(f"  Time: {sequential_time:.2f}s")
     for i, result in enumerate(sequential_results):
@@ -42,13 +42,10 @@ async def main():
     # Concurrent execution
     print("\nConcurrent execution:")
     start = time.perf_counter()
-    
-    tasks = [
-        chat.invoke(messages=q, max_tokens=50)
-        for q in questions
-    ]
+
+    tasks = [chat.invoke(messages=q, max_tokens=50) for q in questions]
     concurrent_results = await asyncio.gather(*tasks)
-    
+
     concurrent_time = time.perf_counter() - start
     print(f"  Time: {concurrent_time:.2f}s")
     print(f"  Speedup: {sequential_time / concurrent_time:.1f}x faster")
@@ -120,22 +117,22 @@ async def main():
     async def rate_limited_requests(messages: list, max_concurrent: int = 3):
         """Execute requests with a concurrency limit."""
         semaphore = asyncio.Semaphore(max_concurrent)
-        
+
         async def limited_invoke(msg: str, idx: int):
             async with semaphore:
                 print(f"  Starting request {idx}...")
                 response = await chat.invoke(messages=msg, max_tokens=30)
                 print(f"  Completed request {idx}")
                 return response.content
-        
+
         tasks = [limited_invoke(msg, i) for i, msg in enumerate(messages)]
         return await asyncio.gather(*tasks)
 
     messages = [f"What is {i} + {i}?" for i in range(1, 7)]
-    
+
     print(f"\nExecuting {len(messages)} requests with max 3 concurrent:")
     results = await rate_limited_requests(messages, max_concurrent=3)
-    
+
     print("\nResults:")
     for i, result in enumerate(results):
         print(f"  {i}: {result[:40]}...")

@@ -14,7 +14,7 @@ from llm_connector import UserMessage, TextBlock, ImageBlock, Role
 def encode_image_to_data_url(image_path: str) -> str:
     """Convert a local image to a data URL."""
     path = Path(image_path)
-    
+
     # Determine MIME type
     suffix = path.suffix.lower()
     mime_types = {
@@ -25,11 +25,11 @@ def encode_image_to_data_url(image_path: str) -> str:
         ".webp": "image/webp",
     }
     mime_type = mime_types.get(suffix, "image/jpeg")
-    
+
     # Read and encode
     with open(path, "rb") as f:
         encoded = base64.b64encode(f.read()).decode("utf-8")
-    
+
     return f"data:{mime_type};base64,{encoded}"
 
 
@@ -49,7 +49,7 @@ def main():
         content=[
             TextBlock(text="What animal is in this image? Describe it briefly."),
             ImageBlock(url=image_url, detail="low"),
-        ]
+        ],
     )
 
     response = chat.invoke(
@@ -69,9 +69,11 @@ def main():
     message = UserMessage(
         role=Role.USER,
         content=[
-            TextBlock(text="Describe this image in detail, including colors, composition, and any text visible."),
+            TextBlock(
+                text="Describe this image in detail, including colors, composition, and any text visible."
+            ),
             ImageBlock(url=image_url, detail="high"),
-        ]
+        ],
     )
 
     response = chat.invoke(
@@ -93,10 +95,12 @@ def main():
     message = UserMessage(
         role=Role.USER,
         content=[
-            TextBlock(text="Compare these two images. What animals are shown and how do they differ?"),
+            TextBlock(
+                text="Compare these two images. What animals are shown and how do they differ?"
+            ),
             ImageBlock(url=image_url_1, detail="low"),
             ImageBlock(url=image_url_2, detail="low"),
-        ]
+        ],
     )
 
     response = chat.invoke(
@@ -117,7 +121,7 @@ def main():
         content=[
             TextBlock(text="Write a short poem inspired by this image."),
             ImageBlock(url=image_url, detail="low"),
-        ]
+        ],
     )
 
     stream = chat.invoke(
@@ -130,7 +134,7 @@ def main():
     for chunk in stream:
         if chunk.delta_content:
             print(chunk.delta_content, end="", flush=True)
-    
+
     print()
 
     print()
@@ -140,11 +144,11 @@ def main():
     print("Note: This example shows the pattern for local images.")
     print("Uncomment and provide a valid image path to test.")
     print()
-    
+
     # Uncomment below to test with a local image:
     # local_image_path = "/path/to/your/image.jpg"
     # data_url = encode_image_to_data_url(local_image_path)
-    # 
+    #
     # message = UserMessage(
     #     role=Role.USER,
     #     content=[
@@ -152,12 +156,13 @@ def main():
     #         ImageBlock(url=data_url, detail="auto"),
     #     ]
     # )
-    # 
+    #
     # response = chat.invoke(messages=message, model="gpt-4o-mini")
     # print(f"Response: {response.content}")
 
     print("Code pattern for local images:")
-    print("""
+    print(
+        """
     from pathlib import Path
     import base64
     
@@ -174,7 +179,8 @@ def main():
             ImageBlock(url=data_url, detail="auto"),
         ]
     )
-    """)
+    """
+    )
 
 
 if __name__ == "__main__":

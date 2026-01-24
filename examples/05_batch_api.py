@@ -21,11 +21,11 @@ def create_batch_requests(prompts: list[str], model: str = "gpt-4o-mini") -> str
             "body": {
                 "model": model,
                 "messages": [{"role": "user", "content": prompt}],
-                "max_tokens": 200
-            }
+                "max_tokens": 200,
+            },
         }
         requests.append(json.dumps(request))
-    
+
     return "\n".join(requests)
 
 
@@ -53,8 +53,7 @@ def main():
 
     # Submit batch job
     batch_request = batch_api.create(
-        file=jsonl_content.encode("utf-8"),
-        completion_window="24h"
+        file=jsonl_content.encode("utf-8"), completion_window="24h"
     )
 
     print(f"Batch job created!")
@@ -69,27 +68,35 @@ def main():
     print("=" * 50)
 
     job_id = batch_request.id
-    
+
     # Poll for status (in real usage, you might use webhooks or longer intervals)
     max_checks = 30
     check_interval = 10  # seconds
-    
+
     for i in range(max_checks):
         status = batch_api.status(job_id)
         print(f"[{i+1}/{max_checks}] Status: {status.status.value}", end="")
-        
+
         if status.request_counts:
             counts = status.request_counts
-            print(f" - Completed: {counts.get('completed', 0)}/{counts.get('total', 0)}", end="")
-        
+            print(
+                f" - Completed: {counts.get('completed', 0)}/{counts.get('total', 0)}",
+                end="",
+            )
+
         print()
-        
+
         # Check if job is done
-        if status.status in [BatchStatus.COMPLETED, BatchStatus.FAILED, BatchStatus.EXPIRED, BatchStatus.CANCELLED]:
+        if status.status in [
+            BatchStatus.COMPLETED,
+            BatchStatus.FAILED,
+            BatchStatus.EXPIRED,
+            BatchStatus.CANCELLED,
+        ]:
             break
-        
+
         time.sleep(check_interval)
-    
+
     print(f"\nFinal status: {status.status.value}")
 
     print()
@@ -99,16 +106,16 @@ def main():
 
     if status.status == BatchStatus.COMPLETED:
         result = batch_api.result(job_id)
-        
+
         print(f"Output file: {result.output_file_id}")
         print(f"Total records: {len(result.records)}")
         print()
-        
+
         for record in result.records:
             custom_id = record.get("custom_id", "unknown")
             response = record.get("response", {})
             body = response.get("body", {})
-            
+
             if "choices" in body:
                 content = body["choices"][0]["message"]["content"]
                 print(f"{custom_id}: {content[:100]}...")
@@ -116,7 +123,7 @@ def main():
                 print(f"{custom_id}: ERROR - {record['error']}")
     else:
         print(f"Batch did not complete successfully. Status: {status.status.value}")
-        
+
         # Check for error file
         if status.error_file_id:
             error_content = file_api.download(file_id=status.error_file_id)
@@ -129,7 +136,7 @@ def main():
 
     batches = batch_api.list(limit=5)
     print(f"Recent batch jobs ({len(batches)}):")
-    
+
     for batch in batches:
         print(f"  - {batch.id}")
         print(f"    Status: {batch.status.value}")
@@ -146,12 +153,11 @@ def main():
     # Create another batch to demonstrate cancellation
     small_batch = create_batch_requests(["Test prompt 1", "Test prompt 2"])
     new_batch = batch_api.create(
-        file=small_batch.encode("utf-8"),
-        completion_window="24h"
+        file=small_batch.encode("utf-8"), completion_window="24h"
     )
-    
+
     print(f"Created batch: {new_batch.id}")
-    
+
     # Cancel it immediately
     if new_batch.status in [BatchStatus.VALIDATING, BatchStatus.IN_PROGRESS]:
         cancelled = batch_api.cancel(new_batch.id)

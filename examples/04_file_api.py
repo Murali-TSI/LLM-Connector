@@ -28,8 +28,8 @@ def main():
             "body": {
                 "model": "gpt-4o-mini",
                 "messages": [{"role": "user", "content": "What is 2+2?"}],
-                "max_tokens": 100
-            }
+                "max_tokens": 100,
+            },
         },
         {
             "custom_id": "request-2",
@@ -37,20 +37,19 @@ def main():
             "url": "/v1/chat/completions",
             "body": {
                 "model": "gpt-4o-mini",
-                "messages": [{"role": "user", "content": "What is the capital of Japan?"}],
-                "max_tokens": 100
-            }
-        }
+                "messages": [
+                    {"role": "user", "content": "What is the capital of Japan?"}
+                ],
+                "max_tokens": 100,
+            },
+        },
     ]
 
     # Convert to JSONL format
     jsonl_content = "\n".join(json.dumps(req) for req in batch_requests)
-    
+
     # Upload from bytes
-    file_id = file_api.upload(
-        file=jsonl_content.encode("utf-8"),
-        purpose="batch"
-    )
+    file_id = file_api.upload(file=jsonl_content.encode("utf-8"), purpose="batch")
     print(f"Uploaded file ID: {file_id}")
 
     print()
@@ -77,10 +76,7 @@ def main():
         temp_path = f.name
 
     try:
-        file_id_2 = file_api.upload(
-            file=temp_path,
-            purpose="batch"
-        )
+        file_id_2 = file_api.upload(file=temp_path, purpose="batch")
         print(f"Uploaded from path: {file_id_2}")
     finally:
         Path(temp_path).unlink()  # Clean up temp file
@@ -94,7 +90,7 @@ def main():
     print(f"Total files: {len(files)}")
     for f in files[:5]:  # Show first 5
         print(f"  - {f.id}: {f.filename} ({f.purpose})")
-    
+
     if len(files) > 5:
         print(f"  ... and {len(files) - 5} more")
 
@@ -125,7 +121,7 @@ def main():
     # Clean up the files we created
     file_api.delete(file_id=file_id)
     print(f"Deleted: {file_id}")
-    
+
     file_api.delete(file_id=file_id_2)
     print(f"Deleted: {file_id_2}")
 
