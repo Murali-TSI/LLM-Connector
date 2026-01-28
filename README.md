@@ -11,6 +11,9 @@ pip install llm-connector
 # With OpenAI support
 pip install llm-connector[openai]
 
+# With Anthropic support
+pip install ll-connector[anthropic]
+
 # With Groq support
 pip install llm-connector[groq]
 
@@ -27,6 +30,23 @@ from llm_connector import ConnectorFactory
 
 # Create a connector
 connector = ConnectorFactory.create("openai", config={"api_key": "your-api-key"})
+
+# Chat completion
+response = connector.chat().invoke(messages="Hello, how are you?")
+print(response.content)
+
+# Streaming
+for chunk in connector.chat().invoke(messages="Tell me a story", stream=True):
+    print(chunk.delta_content, end="", flush=True)
+```
+
+### Anthropic
+
+```python
+from llm_connector import ConnectorFactory
+
+# Create a connector
+connector = ConnectorFactory.create("anthropic", config={"api_key": "your-api-key"})
 
 # Chat completion
 response = connector.chat().invoke(messages="Hello, how are you?")
@@ -69,8 +89,8 @@ for chunk in connector.chat().invoke(messages="Tell me a story", stream=True):
 | Provider | Status | Installation |
 |----------|--------|--------------|
 | OpenAI | ✅ Supported | `pip install llm-connector[openai]` |
+| Anthropic | ✅ Supported | `pip install llm-connector[anthropic]` |
 | Groq | ✅ Supported | `pip install llm-connector[groq]` |
-| Anthropic | 🚧 Coming Soon | - |
 
 ## Usage Examples
 
@@ -81,8 +101,14 @@ from llm_connector import ConnectorFactory
 
 # OpenAI
 connector = ConnectorFactory.create("openai", config={
-    "api_key": "your-api-key",
+    "api_key": "your-openai-api-key",
     # Or set OPENAI_API_KEY environment variable
+})
+
+# Anthropic
+connector = ConnectorFactory.create("anthropic", config={
+    "api_key": "your-anthropic-api-key",
+    # Or set ANTHROPIC_API_KEY environment variable
 })
 
 # Groq

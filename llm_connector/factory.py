@@ -12,8 +12,8 @@ class ConnectorFactory:
 
     _registry: Dict[str, Union[Type[LLMConnector], str]] = {
         "openai": "OpenAIConnector",
+        "anthropic": "AnthropicConnector",
         "groq": "GroqConnector",
-        # "anthropic": "AnthropicConnector",  # Coming soon
     }
 
     @classmethod
@@ -22,7 +22,7 @@ class ConnectorFactory:
         Register a custom connector class.
 
         Args:
-            provider: Provider name (e.g., 'openai', 'groq')
+            provider: Provider name (e.g., 'openai', 'anthropic', 'groq')
             connector_cls: Connector class that inherits from LLMConnector
         """
         if not issubclass(connector_cls, LLMConnector):
@@ -72,7 +72,7 @@ class ConnectorFactory:
         Create a connector instance for the specified provider.
 
         Args:
-            provider: Provider name (e.g., 'openai', 'groq')
+            provider: Provider name (e.g., 'openai', 'anthropic', 'groq')
             config: Configuration dictionary for the connector
 
         Returns:
