@@ -1,13 +1,3 @@
-"""
-Groq File API Implementation
-
-Groq's File API is OpenAI-compatible and supports:
-- JSONL file format
-- Max 50,000 lines per file
-- Max 200MB file size
-- Purpose: "batch" for batch processing
-"""
-
 from __future__ import annotations
 
 from typing import Union, Optional, BinaryIO, List, TYPE_CHECKING
@@ -69,7 +59,7 @@ class GroqFileAPI(FileAPI):
             FileObject with file metadata
         """
         try:
-            response = self._client.files.retrieve(file_id)
+            response = self._client.files.info(file_id)
             return FileObject(
                 id=response.id,
                 filename=response.filename,
@@ -93,7 +83,7 @@ class GroqFileAPI(FileAPI):
         """
         try:
             response = self._client.files.content(file_id)
-            return response.content
+            return response
         except Exception as e:
             raise self._handle_exception(e)
 
@@ -208,7 +198,7 @@ class GroqAsyncFileAPI(AsyncFileAPI):
             FileObject with file metadata
         """
         try:
-            response = await self._client.files.retrieve(file_id)
+            response = await self._client.files.info(file_id)
             return FileObject(
                 id=response.id,
                 filename=response.filename,
@@ -232,7 +222,7 @@ class GroqAsyncFileAPI(AsyncFileAPI):
         """
         try:
             response = await self._client.files.content(file_id)
-            return response.content
+            return response
         except Exception as e:
             raise self._handle_exception(e)
 

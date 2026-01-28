@@ -2,7 +2,16 @@ from pydantic import BaseModel
 from abc import ABC, abstractmethod
 from typing import Literal, Union, Optional, BinaryIO, List
 
-PurposeType = Literal["fine-tune", "batch"]
+PurposeType = Literal[
+    "assistants",
+    "assistants_output",
+    "batch",
+    "batch_output",
+    "fine-tune",
+    "fine-tune-results",
+    "vision",
+    "user_data",
+]
 
 
 class FileObject(BaseModel):
