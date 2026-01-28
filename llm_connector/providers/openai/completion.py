@@ -603,9 +603,7 @@ class OpenAIAsyncChatCompletion(AsyncChatCompletion):
             return {"role": role, "content": content}
 
         elif isinstance(msg, UserMessage):
-            # Handle multimodal content
             content = self._format_content_blocks(msg.content)
-            # If single text, simplify
             if len(content) == 1 and content[0].get("type") == "text":
                 return {"role": "user", "content": content[0]["text"]}
             return {"role": "user", "content": content}

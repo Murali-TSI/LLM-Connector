@@ -47,7 +47,6 @@ class GroqBatchProcess(BatchProcess):
             BatchRequest with job details
         """
         try:
-            # Upload file first
             if isinstance(file, str):
                 with open(file, "rb") as f:
                     file_response = self._client.files.create(file=f, purpose="batch")
@@ -58,7 +57,6 @@ class GroqBatchProcess(BatchProcess):
             else:
                 file_response = self._client.files.create(file=file, purpose="batch")
 
-            # Create batch job
             batch_kwargs = {
                 "input_file_id": file_response.id,
                 "endpoint": endpoint,
@@ -109,7 +107,6 @@ class GroqBatchProcess(BatchProcess):
             if not batch.output_file_id:
                 raise BatchError("Batch job has no output file")
 
-            # Download output file
             content = self._client.files.content(batch.output_file_id)
             lines = content.text.strip().split("\n")
 
@@ -263,7 +260,6 @@ class GroqAsyncBatchProcess(AsyncBatchProcess):
             BatchRequest with job details
         """
         try:
-            # Upload file first
             if isinstance(file, str):
                 with open(file, "rb") as f:
                     file_response = await self._client.files.create(
@@ -278,7 +274,6 @@ class GroqAsyncBatchProcess(AsyncBatchProcess):
                     file=file, purpose="batch"
                 )
 
-            # Create batch job
             batch_kwargs = {
                 "input_file_id": file_response.id,
                 "endpoint": endpoint,
@@ -329,7 +324,6 @@ class GroqAsyncBatchProcess(AsyncBatchProcess):
             if not batch.output_file_id:
                 raise BatchError("Batch job has no output file")
 
-            # Download output file
             content = await self._client.files.content(batch.output_file_id)
             lines = content.text.strip().split("\n")
 

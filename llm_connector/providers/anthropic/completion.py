@@ -244,7 +244,6 @@ class AnthropicChatStreamChunks(ChatStreamChunks):
     def delta_tool_calls(self) -> Optional[List[ToolCallDelta]]:
         """Extract tool call deltas from streaming events."""
         if hasattr(self._event, "type"):
-            # Handle content_block_start for tool_use
             if self._event.type == "content_block_start":
                 content_block = self._event.content_block
                 if hasattr(content_block, "type") and content_block.type == "tool_use":
@@ -256,7 +255,6 @@ class AnthropicChatStreamChunks(ChatStreamChunks):
                             arguments=None,
                         )
                     ]
-            # Handle content_block_delta for tool input
             elif self._event.type == "content_block_delta":
                 delta = self._event.delta
                 if hasattr(delta, "type") and delta.type == "input_json_delta":
@@ -463,7 +461,6 @@ class AnthropicChatCompletion(ChatCompletion):
         if temperature is not None:
             request_params["temperature"] = temperature
 
-        # Handle additional kwargs, but filter out OpenAI-specific ones
         filtered_kwargs = {
             k: v for k, v in kwargs.items() if k not in ("stream_options",)
         }
@@ -489,7 +486,6 @@ class AnthropicChatCompletion(ChatCompletion):
 
             with self._client.messages.stream(**request_params) as stream:
                 for event in stream:
-                    # Extract message metadata from message_start
                     if hasattr(event, "type") and event.type == "message_start":
                         if hasattr(event, "message"):
                             message_id = event.message.id
@@ -499,7 +495,6 @@ class AnthropicChatCompletion(ChatCompletion):
                                     event.message.usage.input_tokens
                                 )
 
-                    # Extract output tokens from message_delta
                     if hasattr(event, "type") and event.type == "message_delta":
                         if hasattr(event, "usage") and event.usage:
                             accumulated_usage["output_tokens"] = (
@@ -536,7 +531,6 @@ class AnthropicChatCompletion(ChatCompletion):
 
         for msg in messages:
             if isinstance(msg, SystemMessage):
-                # Collect system messages separately
                 system_text = " ".join(block.text for block in msg.content)
                 system_parts.append(system_text)
             else:
@@ -548,20 +542,17 @@ class AnthropicChatCompletion(ChatCompletion):
     def _format_single_message(self, msg: Message) -> Dict[str, Any]:
         """Convert a single message to Anthropic format."""
         if isinstance(msg, SystemMessage):
-            # This shouldn't be called for system messages, but handle it
             content = " ".join(block.text for block in msg.content)
             return {"role": "user", "content": content}
 
         elif isinstance(msg, UserMessage):
             content = self._format_content_blocks(msg.content)
-            # If single text, simplify
             if len(content) == 1 and content[0].get("type") == "text":
                 return {"role": "user", "content": content[0]["text"]}
             return {"role": "user", "content": content}
 
         elif isinstance(msg, AssistantMessage):
             if msg.tool_calls:
-                # Assistant message with tool use
                 content: List[Dict[str, Any]] = []
                 for tc in msg.tool_calls:
                     content.append(
@@ -580,7 +571,6 @@ class AnthropicChatCompletion(ChatCompletion):
                 return {"role": "assistant", "content": ""}
 
         elif isinstance(msg, ToolMessage):
-            # Tool results in Anthropic format
             content = " ".join(block.text for block in msg.content)
             return {
                 "role": "user",
@@ -607,7 +597,6 @@ class AnthropicChatCompletion(ChatCompletion):
                 formatted.append({"type": "text", "text": block.text})
 
             elif isinstance(block, ImageBlock):
-                # Anthropic image format
                 if block.url.startswith("data:"):
                     # Base64 data URL
                     # Parse: data:image/jpeg;base64,<data>
@@ -625,7 +614,6 @@ class AnthropicChatCompletion(ChatCompletion):
                             }
                         )
                     except (ValueError, IndexError):
-                        # Fallback: treat as URL
                         formatted.append(
                             {
                                 "type": "image",
@@ -636,7 +624,6 @@ class AnthropicChatCompletion(ChatCompletion):
                             }
                         )
                 else:
-                    # Regular URL
                     formatted.append(
                         {
                             "type": "image",
@@ -648,7 +635,6 @@ class AnthropicChatCompletion(ChatCompletion):
                     )
 
             elif isinstance(block, DocumentBlock):
-                # Convert document to text representation
                 formatted.append(
                     {
                         "type": "text",
@@ -662,7 +648,6 @@ class AnthropicChatCompletion(ChatCompletion):
         """Convert tools to Anthropic format."""
         formatted = []
         for tool in tools:
-            # Handle OpenAI-style tool format
             if "type" in tool and tool["type"] == "function":
                 func = tool["function"]
                 formatted.append(
@@ -675,7 +660,6 @@ class AnthropicChatCompletion(ChatCompletion):
                     }
                 )
             elif "parameters" in tool:
-                # Simple format with parameters
                 formatted.append(
                     {
                         "name": tool["name"],
@@ -684,10 +668,8 @@ class AnthropicChatCompletion(ChatCompletion):
                     }
                 )
             elif "input_schema" in tool:
-                # Already in Anthropic format
                 formatted.append(tool)
             else:
-                # Minimal tool definition
                 formatted.append(
                     {
                         "name": tool["name"],
@@ -792,7 +774,6 @@ class AnthropicAsyncChatCompletion(AsyncChatCompletion):
         if temperature is not None:
             request_params["temperature"] = temperature
 
-        # Handle additional kwargs, but filter out OpenAI-specific ones
         filtered_kwargs = {
             k: v for k, v in kwargs.items() if k not in ("stream_options",)
         }
@@ -818,7 +799,6 @@ class AnthropicAsyncChatCompletion(AsyncChatCompletion):
 
             async with self._client.messages.stream(**request_params) as stream:
                 async for event in stream:
-                    # Extract message metadata from message_start
                     if hasattr(event, "type") and event.type == "message_start":
                         if hasattr(event, "message"):
                             message_id = event.message.id
@@ -828,7 +808,6 @@ class AnthropicAsyncChatCompletion(AsyncChatCompletion):
                                     event.message.usage.input_tokens
                                 )
 
-                    # Extract output tokens from message_delta
                     if hasattr(event, "type") and event.type == "message_delta":
                         if hasattr(event, "usage") and event.usage:
                             accumulated_usage["output_tokens"] = (
